@@ -2,44 +2,39 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FSRI Flow Decision Tool</title>
+<title>FSRI Flow Decision</title>
 
 <style>
 body {
   font-family: Arial;
-  background: #0f172a;
-  color: #e2e8f0;
-  display:flex;
-  justify-content:center;
-  padding:20px;
+  background: #0b1220;
+  color: white;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
 }
 
 .container {
-  width:900px;
-  background:#1e293b;
-  padding:20px;
-  border-radius:10px;
+  width: 900px;
 }
 
 input {
-  width:70px;
-  margin:5px;
+  width: 60px;
+  margin: 5px;
 }
 
 button {
-  padding:10px;
-  margin-top:10px;
-  cursor:pointer;
+  padding: 6px 10px;
 }
 
 canvas {
-  background:#0f172a;
-  margin-top:15px;
+  background: #0b1220;
+  margin-top: 10px;
+  border: 1px solid #333;
 }
 
 .result {
-  margin-top:15px;
-  font-weight:bold;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -60,7 +55,6 @@ SPP:
 TP:
 <input id="spp_tp" type="number" value="450">
 
-<br>
 <button onclick="update()">Update</button>
 
 <canvas id="canvas" width="850" height="300"></canvas>
@@ -108,15 +102,15 @@ function update(){
   drawLine(ctx,40,250,820,250);
   drawLine(ctx,40,20,40,250);
 
-  // lines
-  ctx.strokeStyle="blue";
+  // thresholds
+  ctx.strokeStyle="blue";   // FSRI Auto
   drawLine(ctx,40,y(3300),820,y(3300));
 
-  ctx.strokeStyle="green";
-  drawLine(ctx,40,y(5100),820,y(5100));
+  ctx.strokeStyle="green";  // +1 Manual
+  drawLine(ctx,40,y(4800),820,y(4800));
 
-  ctx.strokeStyle="red";
-  drawLine(ctx,40,y(6900),820,y(6900));
+  ctx.strokeStyle="red";    // heavy
+  drawLine(ctx,40,y(6500),820,y(6500));
 
   // flow line
   ctx.strokeStyle="white";
@@ -128,29 +122,43 @@ function update(){
     drawLine(ctx,x1,y(history[i-1].value),x2,y(history[i].value));
   }
 
-  // points
+  // points + labels
   history.forEach((h,i)=>{
     let x = 40+i*(780/history.length);
+    let yPos = y(h.value);
+
+    ctx.fillStyle="white";
+
+    // point
     ctx.beginPath();
-    ctx.arc(x,y(h.value),3,0,2*Math.PI);
+    ctx.arc(x,yPos,3,0,2*Math.PI);
     ctx.fill();
+
+    // TPH label
+    ctx.fillStyle="orange";
+    ctx.font="10px Arial";
+    ctx.fillText(Math.round(h.value), x-15, yPos-10);
   });
 
-  // current
+  // current point
   let last = history[history.length-1];
   let x = 40+(history.length-1)*(780/history.length);
 
-  ctx.fillStyle="orange";
+  ctx.fillStyle="yellow";
   ctx.beginPath();
   ctx.arc(x,y(last.value),6,0,2*Math.PI);
   ctx.fill();
+
+  ctx.fillStyle="yellow";
+  ctx.font="12px Arial";
+  ctx.fillText(Math.round(last.value), x-20, y(last.value)-15);
 
   // ===== AVERAGE =====
   let recent = history.slice(-5);
   let avg = recent.reduce((a,b)=>a+b.value,0)/recent.length;
 
-  // ===== NEW LOGIC =====
-  let manual = 1; // always FSRI operator
+  // ===== LOGIC =====
+  let manual = 1;
   let fsri = 0;
 
   if(avg > 4800){
@@ -168,11 +176,11 @@ function update(){
 
   // ===== RESULT =====
   document.getElementById("result").innerHTML = `
-    TPH: ${tph} <br>
-    AVG: ${Math.round(avg)} <br>
+    <b>TPH:</b> ${tph} |
+    <b>AVG:</b> ${Math.round(avg)} <br>
     SNS1: ${sns1*sns1_tp} | SPP: ${spp*spp_tp} <br><br>
 
-    👉 Manual Inductors: ${manual} <br>
+    👉 Manual: ${manual} <br>
     👉 FSRI Switch: ${fsri}
   `;
 }
