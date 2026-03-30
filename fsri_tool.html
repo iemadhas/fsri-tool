@@ -1,4 +1,4 @@
-https://iemadhas.github.io/fsri-tool/fsri_tool.html<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -355,6 +355,25 @@ https://iemadhas.github.io/fsri-tool/fsri_tool.html<!DOCTYPE html>
       color: #c084fc;
       border: 1px solid rgba(168,85,247,0.2);
     }
+
+    .hc-warning {
+      grid-column: 1 / -1;
+      margin-top: 12px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      animation: hc-blink 1s ease-in-out infinite;
+    }
+
+    @keyframes hc-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
   </style>
 </head>
 <body>
@@ -576,6 +595,10 @@ https://iemadhas.github.io/fsri-tool/fsri_tool.html<!DOCTYPE html>
         html += '<span class="badge badge-fsri">Switch ' + fsri + ' FSRI</span>';
       }
       html += '</div>';
+
+      if (tph >= 8000) {
+        html += '<div class="hc-warning">⚠ HC MUST BE DROPPED — TPH exceeds 8,000</div>';
+      }
 
       document.getElementById("result").innerHTML = html;
     }
