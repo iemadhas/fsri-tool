@@ -1,587 +1,162 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FSRI Flow Decision Tool</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      color: #e2e8f0;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 960px;
-      background: #1e293b;
-      border-radius: 16px;
-      border: 1px solid #334155;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-      overflow: hidden;
-    }
-
-    .header {
-      background: linear-gradient(90deg, #3b82f6, #6366f1);
-      padding: 20px 28px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .header-icon {
-      width: 36px;
-      height: 36px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
-    }
-
-    .body-content {
-      padding: 24px 28px;
-    }
-
-    .input-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .input-card {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 18px;
-    }
-
-    .input-card-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: #94a3b8;
-      margin-bottom: 14px;
-      font-weight: 600;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 12px;
-    }
-
-    .input-group {
-      flex: 1;
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 12px;
-      color: #64748b;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 10px 12px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #e2e8f0;
-      font-size: 16px;
-      font-weight: 600;
-      font-family: 'SF Mono', 'Cascadia Code', monospace;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      text-align: center;
-    }
-
-    .input-group input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-
-    .btn-update {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(90deg, #3b82f6, #6366f1);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: 0.3px;
-      margin-bottom: 20px;
-    }
-
-    .btn-update:hover { opacity: 0.9; }
-    .btn-update:active { transform: scale(0.99); }
-
-    .chart-wrapper {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .chart-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: #94a3b8;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    canvas {
-      width: 100%;
-      display: block;
-      border-radius: 8px;
-    }
-
-    .legend {
-      display: flex;
-      gap: 20px;
-      margin-top: 10px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: #64748b;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 3px;
-      border-radius: 2px;
-    }
-</style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="header-icon">⚡</div>
-      <h1>FSRI Flow Decision Tool</h1>
-    </div>
-
-    <div class="body-content">
-      <div class="input-section">
-        <div class="input-card">
-          <div class="input-card-title">SNS1 Configuration</div>
-          <div class="input-row">
-            <div class="input-group">
-              <label>Packers</label>
-              <input type="number" id="sns1" value="11">
-            </div>
-            <div class="input-group">
-              <label>Throughput</label>
-              <input type="number" id="sns1_tp" value="320">
-            </div>
-          </div>
-        </div>
-        <div class="input-card">
-          <div class="input-card-title">SPP Configuration</div>
-          <div class="input-row">
-            <div class="input-group">
-              <label>Packers</label>
-              <input type="number" id="spp" value="3">
-            </div>
-            <div class="input-group">
-              <label>Throughput</label>
-              <input type="number" id="spp_tp" value="450">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button class="btn-update" onclick="update()">Update</button>
-
-      <div class="chart-wrapper">
-        <div class="chart-label">TPH History</div>
-        <canvas id="canvas" width="850" height="300"></canvas>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>4,800</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div>6,500</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>7,200</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Current</div>
-        </div>
-      </div>
-
-      <div id="result" style="
-        border-radius: 12px;
-        padding: 18px 22px;
-        border: 1px solid #334155;
-        background: #0f172a;
-      "></div>
-    </div>
-  </div>
-
-  <script>
-    let history = [];
-
-    function calcTPH(sns1, spp, sns1_tp, spp_tp) {
-      return sns1 * sns1_tp + spp * spp_tp;
-    }
-
-    function drawLine(ctx, x1, y1, x2, y2) {
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-
-    function update() {
-      let sns1 = +document.getElementById("sns1").value;
-      let spp = +document.getElementById("spp").value;
-      let sns1_tp = +document.getElementById("sns1_tp").value;
-      let spp_tp = +document.getElementById("spp_tp").value;
-      let tph = calcTPH(sns1, spp, sns1_tp, spp_tp);
-      history.push({ value: tph });
-
-      // ===== CHART =====
-      let canvas = document.getElementById("canvas");
-      let ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, 850, 300);
-
-      let maxTPH = 8500;
-      function y(val) { return 250 - (val / maxTPH * 220); }
-
-      // grid
-      ctx.strokeStyle = "#1e293b";
-      ctx.lineWidth = 1;
-      for (let v = 0; v <= maxTPH; v += 1000) {
-        drawLine(ctx, 40, y(v), 820, y(v));
-      }
-
-      // y-axis labels
-      ctx.fillStyle = "#475569";
-      ctx.font = "11px 'Segoe UI', sans-serif";
-      for (let v = 0; v <= maxTPH; v += 1000) {
-        ctx.fillText(v.toLocaleString(), 2, y(v) + 4);
-      }
-
-      // axes
-      ctx.strokeStyle = "#334155";
-      ctx.lineWidth = 1;
-      drawLine(ctx, 40, 250, 820, 250);
-      drawLine(ctx, 40, 20, 40, 250);
-
-      // threshold lines (dashed)
-      ctx.setLineDash([6, 4]);
-      ctx.lineWidth = 1.5;
-
-      ctx.strokeStyle = "#3b82f6";
-      drawLine(ctx, 40, y(4800), 820, y(4800));
-
-      ctx.strokeStyle = "#eab308";
-      drawLine(ctx, 40, y(6500), 820, y(6500));
-
-      ctx.strokeStyle = "#ef4444";
-      drawLine(ctx, 40, y(7200), 820, y(7200));
-
-      ctx.setLineDash([]);
-
-      // flow line
-      if (history.length > 1) {
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 2;
-        for (let i = 1; i < history.length; i++) {
-          let x1 = 40 + (i - 1) * (780 / history.length);
-          let x2 = 40 + i * (780 / history.length);
-          drawLine(ctx, x1, y(history[i - 1].value), x2, y(history[i].value));
-        }
-      }
-
-      // data points
-      ctx.fillStyle = "#94a3b8";
-      for (let i = 0; i < history.length; i++) {
-        let x = 40 + i * (780 / history.length);
-        ctx.beginPath();
-        ctx.arc(x, y(history[i].value), 3, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-
-      // current point (glow + dot)
-      let last = history[history.length - 1];
-      let cx = 40 + (history.length - 1) * (780 / history.length);
-      ctx.fillStyle = "rgba(249, 115, 22, 0.2)";
-      ctx.beginPath();
-      ctx.arc(cx, y(last.value), 12, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = "#f97316";
-      ctx.beginPath();
-      ctx.arc(cx, y(last.value), 5, 0, 2 * Math.PI);
-      ctx.fill();
-
-      // ===== AVERAGE =====
-      let recent = history.slice(-5);
-      let avg = recent.reduce((a, b) => a + b.value, 0) / recent.length;
-
-      // ===== NEW LOGIC =====
-      let manual = 1;
-      let fsri = 0;
-      if (avg > 4800) { manual = 2; }
-      if (avg > 6500) { manual = 3; fsri = 1; }
-      if (avg > 7200) { fsri = 2; }
-
-      // ===== DECISION =====
-      let decisionText = "";
-      let decisionClass = "";
-      if (manual === 1) {
-        decisionText = "AUTO";
-        decisionClass = "auto";
-      } else if (manual === 2) {
-        decisionText = "+1 Manual";
-        decisionClass = "manual1";
-      } else if (manual === 3 && fsri === 0) {
-        decisionText = "+2 Manual";
-        decisionClass = "manual2";
-      } else {
-        decisionText = "HIGH LOAD";
-        decisionClass = "overload";
-      }
-
-      // ===== RESULT =====
-      let colors = {
-        auto:    { bg: "rgba(34,197,94,0.12)",  text: "#4ade80", border: "rgba(34,197,94,0.25)" },
-        manual1: { bg: "rgba(59,130,246,0.12)",  text: "#60a5fa", border: "rgba(59,130,246,0.25)" },
-        manual2: { bg: "rgba(234,179,8,0.12)",   text: "#facc15", border: "rgba(234,179,8,0.25)" },
-        overload:{ bg: "rgba(239,68,68,0.12)",   text: "#f87171", border: "rgba(239,68,68,0.25)" }
-      };
-      let c = colors[decisionClass];
-
-      let html = "";
-      html += "<div style='font-size:28px;font-weight:700;font-family:SF Mono,Cascadia Code,monospace;'>" + tph.toLocaleString();
-      html += " <span style='font-size:14px;color:#64748b;font-weight:400;'>TPH</span></div>";
-      html += "<div style='color:#94a3b8;font-size:13px;margin-top:4px;'>Avg (last 5): " + Math.round(avg).toLocaleString() + "</div>";
-      html += "<div style='color:#64748b;font-size:12px;margin-top:2px;'>Manual: " + manual + "</div>";
-      html += "<div style='margin-top:12px;'>";
-      html += "<span style='display:inline-block;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.5px;";
-      html += "background:" + c.bg + ";color:" + c.text + ";border:1px solid " + c.border + ";'>" + decisionText + "</span>";
-      if (fsri > 0) {
-        html += "<span style='display:inline-block;margin-left:8px;padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;";
-        html += "background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25);'>Switch " + fsri + " FSRI</span>";
-      }
-      html += "</div>";
-
-      document.getElementById("result").innerHTML = html;
-    }
-
-    update();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>FSRI Flow Decision</title>
-
-<style>
-body {
-  font-family: Arial;
-  background: #0b1220;
-  color: white;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-}
-
-.container {
-  width: 900px;
-}
-
-input {
-  width: 60px;
-  margin: 5px;
-}
-
-button {
-  padding: 6px 10px;
-}
-
-canvas {
-  background: #0b1220;
-  margin-top: 10px;
-  border: 1px solid #333;
-}
-
-.result {
-  margin-top: 10px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>FSRI Flow Decision</h2>
-
-SNS1:
-<input id="sns1" type="number" value="11">
-TP:
-<input id="sns1_tp" type="number" value="320">
-
-SPP:
-<input id="spp" type="number" value="3">
-TP:
-<input id="spp_tp" type="number" value="450">
-
-<button onclick="update()">Update</button>
-
-<canvas id="canvas" width="850" height="300"></canvas>
-
-<div id="result" class="result"></div>
-
-</div>
-
 <script>
-
 let history = [];
 
-function calcTPH(sns1, spp, sns1_tp, spp_tp){
-  return (sns1*sns1_tp) + (spp*spp_tp);
+function calcTPH(sns1, spp, sns1_tp, spp_tp) {
+  return sns1 * sns1_tp + spp * spp_tp;
 }
 
-function drawLine(ctx,x1,y1,x2,y2){
+function drawLine(ctx, x1, y1, x2, y2) {
   ctx.beginPath();
-  ctx.moveTo(x1,y1);
-  ctx.lineTo(x2,y2);
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
   ctx.stroke();
 }
 
-function update(){
+function update() {
 
   let sns1 = +document.getElementById("sns1").value;
   let spp = +document.getElementById("spp").value;
   let sns1_tp = +document.getElementById("sns1_tp").value;
   let spp_tp = +document.getElementById("spp_tp").value;
 
-  let tph = calcTPH(sns1,spp,sns1_tp,spp_tp);
+  let tph = calcTPH(sns1, spp, sns1_tp, spp_tp);
 
-  let time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  history.push({value:tph, time:time});
-
-  let ctx = document.getElementById("canvas").getContext("2d");
-  ctx.clearRect(0,0,850,300);
-
-  let max = 8000;
-
-  function y(v){ return 250 - (v/max*200); }
-
-  // axes
-  ctx.strokeStyle="#555";
-  drawLine(ctx,40,250,820,250);
-  drawLine(ctx,40,20,40,250);
-
-  // thresholds
-  ctx.strokeStyle="blue";   // FSRI Auto
-  drawLine(ctx,40,y(3300),820,y(3300));
-
-  ctx.strokeStyle="green";  // +1 Manual
-  drawLine(ctx,40,y(4800),820,y(4800));
-
-  ctx.strokeStyle="red";    // heavy
-  drawLine(ctx,40,y(6500),820,y(6500));
-
-  // flow line
-  ctx.strokeStyle="white";
-
-  for(let i=1;i<history.length;i++){
-    let x1 = 40+(i-1)*(780/history.length);
-    let x2 = 40+i*(780/history.length);
-
-    drawLine(ctx,x1,y(history[i-1].value),x2,y(history[i].value));
+  // 🔥 FIX: update current instead of adding new point
+  if (history.length === 0) {
+    history.push({ value: tph });
+  } else {
+    history[history.length - 1].value = tph;
   }
 
-  // points + labels
-  history.forEach((h,i)=>{
-    let x = 40+i*(780/history.length);
-    let yPos = y(h.value);
+  // ===== CHART =====
+  let canvas = document.getElementById("canvas");
+  let ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, 850, 300);
 
-    ctx.fillStyle="white";
+  let maxTPH = 8500;
+  function y(val) { return 250 - (val / maxTPH * 220); }
 
-    // point
+  // grid
+  ctx.strokeStyle = "#1e293b";
+  for (let v = 0; v <= maxTPH; v += 1000) {
+    drawLine(ctx, 40, y(v), 820, y(v));
+  }
+
+  // axis labels
+  ctx.fillStyle = "#475569";
+  ctx.font = "11px Segoe UI";
+  for (let v = 0; v <= maxTPH; v += 1000) {
+    ctx.fillText(v.toLocaleString(), 2, y(v) + 4);
+  }
+
+  // axes
+  ctx.strokeStyle = "#334155";
+  drawLine(ctx, 40, 250, 820, 250);
+  drawLine(ctx, 40, 20, 40, 250);
+
+  // thresholds
+  ctx.setLineDash([6, 4]);
+
+  ctx.strokeStyle = "#3b82f6";
+  drawLine(ctx, 40, y(4800), 820, y(4800));
+
+  ctx.strokeStyle = "#eab308";
+  drawLine(ctx, 40, y(6500), 820, y(6500));
+
+  ctx.strokeStyle = "#ef4444";
+  drawLine(ctx, 40, y(7200), 820, y(7200));
+
+  ctx.setLineDash([]);
+
+  // flow line
+  if (history.length > 1) {
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 2;
+    for (let i = 1; i < history.length; i++) {
+      let x1 = 40 + (i - 1) * (780 / history.length);
+      let x2 = 40 + i * (780 / history.length);
+      drawLine(ctx, x1, y(history[i - 1].value), x2, y(history[i].value));
+    }
+  }
+
+  // points
+  ctx.fillStyle = "#94a3b8";
+  for (let i = 0; i < history.length; i++) {
+    let x = 40 + i * (780 / history.length);
     ctx.beginPath();
-    ctx.arc(x,yPos,3,0,2*Math.PI);
+    ctx.arc(x, y(history[i].value), 3, 0, 2 * Math.PI);
     ctx.fill();
-
-    // TPH label
-    ctx.fillStyle="orange";
-    ctx.font="10px Arial";
-    ctx.fillText(Math.round(h.value), x-15, yPos-10);
-  });
+  }
 
   // current point
-  let last = history[history.length-1];
-  let x = 40+(history.length-1)*(780/history.length);
+  let last = history[history.length - 1];
+  let cx = 40 + (history.length - 1) * (780 / history.length);
 
-  ctx.fillStyle="yellow";
+  ctx.fillStyle = "rgba(249,115,22,0.2)";
   ctx.beginPath();
-  ctx.arc(x,y(last.value),6,0,2*Math.PI);
+  ctx.arc(cx, y(last.value), 12, 0, 2 * Math.PI);
   ctx.fill();
 
-  ctx.fillStyle="yellow";
-  ctx.font="12px Arial";
-  ctx.fillText(Math.round(last.value), x-20, y(last.value)-15);
+  ctx.fillStyle = "#f97316";
+  ctx.beginPath();
+  ctx.arc(cx, y(last.value), 5, 0, 2 * Math.PI);
+  ctx.fill();
 
   // ===== AVERAGE =====
   let recent = history.slice(-5);
-  let avg = recent.reduce((a,b)=>a+b.value,0)/recent.length;
+  let avg = recent.reduce((a, b) => a + b.value, 0) / recent.length;
 
   // ===== LOGIC =====
   let manual = 1;
   let fsri = 0;
 
-  if(avg > 4800){
-    manual = 2;
+  if (avg > 4800) manual = 2;
+  if (avg > 6500) { manual = 3; fsri = 1; }
+  if (avg > 7200) fsri = 2;
+
+  // ===== DECISION =====
+  let decisionText = "";
+  let decisionClass = "";
+
+  if (manual === 1) {
+    decisionText = "AUTO";
+    decisionClass = "auto";
+  } else if (manual === 2) {
+    decisionText = "+1 Manual";
+    decisionClass = "manual1";
+  } else if (manual === 3 && fsri === 0) {
+    decisionText = "+2 Manual";
+    decisionClass = "manual2";
+  } else {
+    decisionText = "HIGH LOAD";
+    decisionClass = "overload";
   }
 
-  if(avg > 6500){
-    manual = 3;
-    fsri = 1;
+  let colors = {
+    auto: { bg: "rgba(34,197,94,0.12)", text: "#4ade80", border: "rgba(34,197,94,0.25)" },
+    manual1: { bg: "rgba(59,130,246,0.12)", text: "#60a5fa", border: "rgba(59,130,246,0.25)" },
+    manual2: { bg: "rgba(234,179,8,0.12)", text: "#facc15", border: "rgba(234,179,8,0.25)" },
+    overload: { bg: "rgba(239,68,68,0.12)", text: "#f87171", border: "rgba(239,68,68,0.25)" }
+  };
+
+  let c = colors[decisionClass];
+
+  let html = "";
+  html += "<div style='font-size:28px;font-weight:700;'>" + tph.toLocaleString() + " TPH</div>";
+  html += "<div style='color:#94a3b8;font-size:13px;'>Avg (last 5): " + Math.round(avg) + "</div>";
+  html += "<div style='color:#64748b;font-size:12px;'>Manual: " + manual + "</div>";
+
+  html += "<div style='margin-top:10px'>";
+  html += "<span style='padding:6px 14px;border-radius:20px;background:" + c.bg + ";color:" + c.text + ";border:1px solid " + c.border + "'>" + decisionText + "</span>";
+
+  if (fsri > 0) {
+    html += "<span style='margin-left:8px;padding:6px 14px;border-radius:20px;background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25)'>Switch " + fsri + " FSRI</span>";
   }
 
-  if(avg > 7200){
-    fsri = 2;
-  }
+  html += "</div>";
 
-  // ===== RESULT =====
-  document.getElementById("result").innerHTML = `
-    <b>TPH:</b> ${tph} |
-    <b>AVG:</b> ${Math.round(avg)} <br>
-    SNS1: ${sns1*sns1_tp} | SPP: ${spp*spp_tp} <br><br>
-
-    👉 Manual: ${manual} <br>
-    👉 FSRI Switch: ${fsri}
-  `;
+  document.getElementById("result").innerHTML = html;
 }
 
 update();
-
 </script>
-
-</body>
-</html>
