@@ -1,162 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSRI Flow Decision Tool</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  color:#e2e8f0;
+}
+
+.container{
+  width:100%;
+  max-width:950px;
+  background:#1e293b;
+  border-radius:16px;
+  border:1px solid #334155;
+  overflow:hidden;
+}
+
+.header{
+  background:linear-gradient(90deg,#3b82f6,#6366f1);
+  padding:20px;
+  font-weight:600;
+}
+
+.body{padding:20px;}
+
+.inputs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.card{
+  background:#0f172a;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #334155;
+}
+
+.card label{
+  font-size:12px;
+  color:#94a3b8;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  background:#1e293b;
+  border:1px solid #334155;
+  border-radius:6px;
+  color:white;
+  text-align:center;
+}
+
+button{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(90deg,#3b82f6,#6366f1);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.chart{
+  margin-top:20px;
+  background:#0f172a;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #334155;
+}
+
+.result{
+  margin-top:15px;
+  padding:15px;
+  background:#0f172a;
+  border-radius:10px;
+  border:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="header">⚡ FSRI Flow Decision Tool</div>
+
+<div class="body">
+
+<div class="inputs">
+
+<div class="card">
+<label>SNS1 Packers</label>
+<input id="sns1" type="number" value="11">
+<label>Throughput</label>
+<input id="sns1_tp" type="number" value="320">
+</div>
+
+<div class="card">
+<label>SPP Packers</label>
+<input id="spp" type="number" value="3">
+<label>Throughput</label>
+<input id="spp_tp" type="number" value="450">
+</div>
+
+</div>
+
+<button onclick="update()">Update</button>
+<button onclick="update(true)">Add Snapshot</button>
+
+<div class="chart">
+<canvas id="canvas" width="850" height="300"></canvas>
+</div>
+
+<div id="result" class="result"></div>
+
+</div>
+</div>
+
 <script>
 let history = [];
 
-function calcTPH(sns1, spp, sns1_tp, spp_tp) {
-  return sns1 * sns1_tp + spp * spp_tp;
+function calcTPH(sns1, spp, sns1_tp, spp_tp){
+  return sns1*sns1_tp + spp*spp_tp;
 }
 
-function drawLine(ctx, x1, y1, x2, y2) {
+function drawLine(ctx,x1,y1,x2,y2){
   ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
   ctx.stroke();
 }
 
-function update() {
+function update(add=false){
 
-  let sns1 = +document.getElementById("sns1").value;
-  let spp = +document.getElementById("spp").value;
-  let sns1_tp = +document.getElementById("sns1_tp").value;
-  let spp_tp = +document.getElementById("spp_tp").value;
+// ✅ FIX (no shadowing)
+let sns1Val = +document.getElementById("sns1").value;
+let sppVal = +document.getElementById("spp").value;
+let sns1TP = +document.getElementById("sns1_tp").value;
+let sppTP = +document.getElementById("spp_tp").value;
 
-  let tph = calcTPH(sns1, spp, sns1_tp, spp_tp);
+let tph = calcTPH(sns1Val, sppVal, sns1TP, sppTP);
 
-  // 🔥 FIX: update current instead of adding new point
-  if (history.length === 0) {
-    history.push({ value: tph });
-  } else {
-    history[history.length - 1].value = tph;
-  }
+// history logic
+if(history.length===0){
+  history.push({value:tph});
+}else if(add){
+  history.push({value:tph});
+}else{
+  history[history.length-1].value=tph;
+}
 
-  // ===== CHART =====
-  let canvas = document.getElementById("canvas");
-  let ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, 850, 300);
+drawChart();
+decision(tph);
+}
 
-  let maxTPH = 8500;
-  function y(val) { return 250 - (val / maxTPH * 220); }
+function drawChart(){
 
-  // grid
-  ctx.strokeStyle = "#1e293b";
-  for (let v = 0; v <= maxTPH; v += 1000) {
-    drawLine(ctx, 40, y(v), 820, y(v));
-  }
+let canvas=document.getElementById("canvas");
+let ctx=canvas.getContext("2d");
 
-  // axis labels
-  ctx.fillStyle = "#475569";
-  ctx.font = "11px Segoe UI";
-  for (let v = 0; v <= maxTPH; v += 1000) {
-    ctx.fillText(v.toLocaleString(), 2, y(v) + 4);
-  }
+ctx.clearRect(0,0,850,300);
 
-  // axes
-  ctx.strokeStyle = "#334155";
-  drawLine(ctx, 40, 250, 820, 250);
-  drawLine(ctx, 40, 20, 40, 250);
+let max=8500;
+let y=v=>250-(v/max*220);
 
-  // thresholds
-  ctx.setLineDash([6, 4]);
+// grid
+ctx.strokeStyle="#1e293b";
+for(let i=0;i<=max;i+=1000){
+  drawLine(ctx,40,y(i),820,y(i));
+}
 
-  ctx.strokeStyle = "#3b82f6";
-  drawLine(ctx, 40, y(4800), 820, y(4800));
+// axes
+ctx.strokeStyle="#334155";
+drawLine(ctx,40,250,820,250);
+drawLine(ctx,40,20,40,250);
 
-  ctx.strokeStyle = "#eab308";
-  drawLine(ctx, 40, y(6500), 820, y(6500));
+// thresholds
+ctx.setLineDash([6,4]);
 
-  ctx.strokeStyle = "#ef4444";
-  drawLine(ctx, 40, y(7200), 820, y(7200));
+ctx.strokeStyle="#3b82f6";
+drawLine(ctx,40,y(4800),820,y(4800));
 
-  ctx.setLineDash([]);
+ctx.strokeStyle="#eab308";
+drawLine(ctx,40,y(6500),820,y(6500));
 
-  // flow line
-  if (history.length > 1) {
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 2;
-    for (let i = 1; i < history.length; i++) {
-      let x1 = 40 + (i - 1) * (780 / history.length);
-      let x2 = 40 + i * (780 / history.length);
-      drawLine(ctx, x1, y(history[i - 1].value), x2, y(history[i].value));
-    }
-  }
+ctx.strokeStyle="#ef4444";
+drawLine(ctx,40,y(7200),820,y(7200));
 
-  // points
-  ctx.fillStyle = "#94a3b8";
-  for (let i = 0; i < history.length; i++) {
-    let x = 40 + i * (780 / history.length);
-    ctx.beginPath();
-    ctx.arc(x, y(history[i].value), 3, 0, 2 * Math.PI);
-    ctx.fill();
-  }
+ctx.setLineDash([]);
 
-  // current point
-  let last = history[history.length - 1];
-  let cx = 40 + (history.length - 1) * (780 / history.length);
+// line
+if(history.length>1){
+ctx.strokeStyle="#94a3b8";
+ctx.lineWidth=2;
 
-  ctx.fillStyle = "rgba(249,115,22,0.2)";
-  ctx.beginPath();
-  ctx.arc(cx, y(last.value), 12, 0, 2 * Math.PI);
-  ctx.fill();
+for(let i=1;i<history.length;i++){
+let x1=40+(i-1)*(780/(history.length-1));
+let x2=40+i*(780/(history.length-1));
+drawLine(ctx,x1,y(history[i-1].value),x2,y(history[i].value));
+}
+}
 
-  ctx.fillStyle = "#f97316";
-  ctx.beginPath();
-  ctx.arc(cx, y(last.value), 5, 0, 2 * Math.PI);
-  ctx.fill();
+// points
+history.forEach((p,i)=>{
+let x=40+i*(780/Math.max(1,history.length-1));
+ctx.fillStyle="#94a3b8";
+ctx.beginPath();
+ctx.arc(x,y(p.value),3,0,2*Math.PI);
+ctx.fill();
+});
 
-  // ===== AVERAGE =====
-  let recent = history.slice(-5);
-  let avg = recent.reduce((a, b) => a + b.value, 0) / recent.length;
+// current point
+let last=history[history.length-1];
+let cx=40+(history.length-1)*(780/Math.max(1,history.length-1));
 
-  // ===== LOGIC =====
-  let manual = 1;
-  let fsri = 0;
+ctx.fillStyle="rgba(249,115,22,0.2)";
+ctx.beginPath();
+ctx.arc(cx,y(last.value),12,0,2*Math.PI);
+ctx.fill();
 
-  if (avg > 4800) manual = 2;
-  if (avg > 6500) { manual = 3; fsri = 1; }
-  if (avg > 7200) fsri = 2;
+ctx.fillStyle="#f97316";
+ctx.beginPath();
+ctx.arc(cx,y(last.value),5,0,2*Math.PI);
+ctx.fill();
+}
 
-  // ===== DECISION =====
-  let decisionText = "";
-  let decisionClass = "";
+function decision(tph){
 
-  if (manual === 1) {
-    decisionText = "AUTO";
-    decisionClass = "auto";
-  } else if (manual === 2) {
-    decisionText = "+1 Manual";
-    decisionClass = "manual1";
-  } else if (manual === 3 && fsri === 0) {
-    decisionText = "+2 Manual";
-    decisionClass = "manual2";
-  } else {
-    decisionText = "HIGH LOAD";
-    decisionClass = "overload";
-  }
+let avg = history.slice(-5).reduce((a,b)=>a+b.value,0)/Math.min(5,history.length);
 
-  let colors = {
-    auto: { bg: "rgba(34,197,94,0.12)", text: "#4ade80", border: "rgba(34,197,94,0.25)" },
-    manual1: { bg: "rgba(59,130,246,0.12)", text: "#60a5fa", border: "rgba(59,130,246,0.25)" },
-    manual2: { bg: "rgba(234,179,8,0.12)", text: "#facc15", border: "rgba(234,179,8,0.25)" },
-    overload: { bg: "rgba(239,68,68,0.12)", text: "#f87171", border: "rgba(239,68,68,0.25)" }
-  };
+let manual=1;
+let fsri=0;
 
-  let c = colors[decisionClass];
+if(avg>4800) manual=2;
+if(avg>6500){manual=3;fsri=1;}
+if(avg>7200){fsri=2;}
 
-  let html = "";
-  html += "<div style='font-size:28px;font-weight:700;'>" + tph.toLocaleString() + " TPH</div>";
-  html += "<div style='color:#94a3b8;font-size:13px;'>Avg (last 5): " + Math.round(avg) + "</div>";
-  html += "<div style='color:#64748b;font-size:12px;'>Manual: " + manual + "</div>";
-
-  html += "<div style='margin-top:10px'>";
-  html += "<span style='padding:6px 14px;border-radius:20px;background:" + c.bg + ";color:" + c.text + ";border:1px solid " + c.border + "'>" + decisionText + "</span>";
-
-  if (fsri > 0) {
-    html += "<span style='margin-left:8px;padding:6px 14px;border-radius:20px;background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25)'>Switch " + fsri + " FSRI</span>";
-  }
-
-  html += "</div>";
-
-  document.getElementById("result").innerHTML = html;
+document.getElementById("result").innerHTML=
+`
+<div style="font-size:28px;font-weight:700">${tph.toLocaleString()} TPH</div>
+<div style="color:#94a3b8">Avg: ${Math.round(avg)}</div>
+<div>Manual: ${manual}</div>
+<div>${fsri>0?`Switch ${fsri} FSRI`:""}</div>
+`;
 }
 
 update();
 </script>
+
+</body>
+</html>
